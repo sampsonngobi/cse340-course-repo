@@ -99,7 +99,8 @@ VALUES
 ('Construction & Infrastructure'),
 ('Education & Youth'),
 ('Food Security'),
-('Environmental Cleanup');
+('Environmental Cleanup')
+ON CONFLICT (name) DO NOTHING;
 
 
 -- ========================================
@@ -107,25 +108,27 @@ VALUES
 -- Each project is associated with at least one category
 -- ========================================
 INSERT INTO service_project_category (project_id, category_id)
-VALUES
--- BrightFuture Builders projects (1-5)
-(1, 1), (1, 4),
-(2, 1),
-(3, 1),
-(4, 1),
-(5, 1),
-
--- GreenHarvest Growers projects (6-10)
-(6, 2), (6, 3),
-(7, 3),
-(8, 3),
-(9, 4),
-(10, 3),
-
--- UnityServe Volunteers projects (11-15)
-(11, 3),
-(12, 2),
-(13, 4),
-(14, 3),
-(15, 3);
-
+SELECT sp.project_id, pc.category_id
+FROM (
+    VALUES
+    ('Park Bench Restoration', 'Construction & Infrastructure'),
+    ('Park Bench Restoration', 'Environmental Cleanup'),
+    ('Community Ramp Build', 'Construction & Infrastructure'),
+    ('Playground Shade Installation', 'Construction & Infrastructure'),
+    ('Bus Stop Shelter Upgrade', 'Construction & Infrastructure'),
+    ('Senior Center Repair Day', 'Construction & Infrastructure'),
+    ('School Garden Startup', 'Education & Youth'),
+    ('School Garden Startup', 'Food Security'),
+    ('Neighborhood Compost Workshop', 'Food Security'),
+    ('Urban Orchard Planting', 'Food Security'),
+    ('Water-Wise Irrigation Build', 'Environmental Cleanup'),
+    ('Harvest and Donate Day', 'Food Security'),
+    ('Food Bank Sorting Drive', 'Food Security'),
+    ('Youth Tutoring Marathon', 'Education & Youth'),
+    ('Neighborhood Cleanup Day', 'Environmental Cleanup'),
+    ('Blanket Assembly Event', 'Food Security'),
+    ('Holiday Meal Prep Team', 'Food Security')
+) AS map(project_title, category_name)
+JOIN service_project sp ON sp.title = map.project_title
+JOIN project_category pc ON pc.name = map.category_name
+ON CONFLICT (project_id, category_id) DO NOTHING;
