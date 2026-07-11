@@ -3,7 +3,9 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 import { testConnection } from './src/models/db.js';
+
 import { getAllOrganizations } from './src/models/organizations.js';
+import { getAllProjects } from './src/models/projects.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +43,7 @@ app.get('/', async (req, res) => {
 app.get('/organizations', async (req, res) => {
     try {
         const organizations = await getAllOrganizations();
-        const title = '....yes Our Partner Organizations';
+        const title = 'Our Partner Organizations';
 
         res.render('organizations', { title, organizations });
     } catch (error) {
@@ -51,8 +53,14 @@ app.get('/organizations', async (req, res) => {
 });
 
 app.get('/projects', async (req, res) => {
-    const title = 'Service Projects';
-    res.render('projects', { title });
+    try {
+        const projects = await getAllProjects();
+        const title = 'Service Projects';
+        res.render('projects', { title, projects });
+    } catch (error) {
+        console.error('Error loading projects route:', error);
+        res.status(500).send('Error loading projects data');
+    }
 });
 
 app.get('/categories', async (req, res) => {
