@@ -6,6 +6,7 @@ import { testConnection } from './src/models/db.js';
 
 import { getAllOrganizations } from './src/models/organizations.js';
 import { getAllProjects } from './src/models/projects.js';
+import { getAllCategories } from './src/models/categories.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -64,9 +65,16 @@ app.get('/projects', async (req, res) => {
 });
 
 app.get('/categories', async (req, res) => {
-    const title = 'Here are the categories of our projects';
-    res.render('categories', { title });
+    try {
+        const categories = await getAllCategories();
+        const title = 'Here are the categories of our projects';
+        res.render('categories', { title, categories });
+    } catch (error) {
+        console.error('Error loading categories route:', error);
+        res.status(500).send('Error loading categories data');
+    }
 });
+
 app.listen(PORT, async () => {
     try {
         await testConnection();
