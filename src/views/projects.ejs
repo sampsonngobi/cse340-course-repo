@@ -34,12 +34,16 @@
     <h1>
         <%= title %>
     </h1>
-    <h2>Upcoming and ongoing Service Projects</h2>
+    
     <% if (typeof projects !== 'undefined' && projects && projects.length > 0) { %>
         <ul>
             <% projects.forEach((project) => { %>
                 <li>
-                    Date: <%= new Date(project.project_date).toLocaleDateString('en-US') %>: <strong><%= project.title %></strong> (<%= project.organization_name %>)
+                    <a href="/project/<%= project.project_id %>"><strong><%= project.title %></strong></a>
+                    <span> - </span>
+                    <a href="/organization/<%= project.organization_id %>"><%= project.organization_name %></a>
+                    <span> - </span>
+                    <%= new Date(project.date).toLocaleDateString('en-US') %>
                 </li>
             <% }) %>
         </ul>

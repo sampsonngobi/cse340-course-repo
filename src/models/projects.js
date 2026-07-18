@@ -18,18 +18,62 @@ const getAllProjects = async () => {
     return result.rows;
 };
 
+const getUpcomingProjects = async (numberOfProjects) => {
+    const query = `
+        SELECT
+            sp.project_id,
+            sp.title,
+            sp.description,
+            sp.project_date AS date,
+            sp.location,
+            sp.organization_id,
+            o.name AS organization_name
+        FROM service_project sp
+        JOIN organization o ON sp.organization_id = o.organization_id
+        WHERE sp.project_date >= CURRENT_DATE
+        ORDER BY sp.project_date ASC, sp.project_id ASC
+        LIMIT $1;
+    `;
+
+    const queryParams = [numberOfProjects];
+    const result = await db.query(query, queryParams);
+
+    return result.rows;
+};
+
+const getProjectDetails = async (id) => {
+    const query = `
+        SELECT
+            sp.project_id,
+            sp.title,
+            sp.description,
+            sp.project_date AS date,
+            sp.location,
+            sp.organization_id,
+            o.name AS organization_name
+        FROM service_project sp
+        JOIN organization o ON sp.organization_id = o.organization_id
+        WHERE sp.project_id = $1;
+    `;
+
+    const queryParams = [id];
+    const result = await db.query(query, queryParams);
+
+    return result.rows.length > 0 ? result.rows[0] : null;
+};
+
 const getProjectsByOrganizationId = async (organizationId) => {
     const query = `
         SELECT
-          project_id,
-          organization_id,
-          title,
-          description,
-          location,
-          date
-        FROM project
+                    project_id,
+                    organization_id,
+                    title,
+                    description,
+                    location,
+                    project_date AS date
+                FROM service_project
         WHERE organization_id = $1
-        ORDER BY date;
+                ORDER BY project_date;
       `;
 
     const queryParams = [organizationId];
@@ -40,4 +84,4 @@ const getProjectsByOrganizationId = async (organizationId) => {
 
 
 
-export { getAllProjects, getProjectsByOrganizationId };
+export { getAllProjects, getUpcomingProjects, getProjectDetails, getProjectsByOrganizationId };
