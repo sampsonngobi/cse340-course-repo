@@ -3,7 +3,7 @@ import express from 'express';
 import { homePage } from "./index.js";
 import { organizationsPage, organizationDetailsPage } from "./organizations.js";
 import { projetspage, showProjectDetailsPage } from "./projects.js";
-import { categoriesPage } from "./categories.js";  
+import { categoriesPage, categoryDetailsPage } from "./categories.js";  
 import { testErrorPage } from "./errors.js";
 
 
@@ -12,10 +12,12 @@ const router = express.Router();
 router.get('/', homePage);
 router.get('/organizations', organizationsPage);
 router.get('/projects', projetspage);
-router.get('/projects/:id', showProjectDetailsPage);
+router.get('/projects/:id', (req, res) => res.redirect(`/project/${req.params.id}`));
 router.get('/project/:id', showProjectDetailsPage);
 router.get('/categories', categoriesPage);
-router.get('/organizations/:id', organizationDetailsPage);
+router.get('/categories/:id', (req, res) => res.redirect(`/category/${req.params.id}`));
+router.get('/category/:id', categoryDetailsPage);
+router.get('/organizations/:id', (req, res) => res.redirect(`/organization/${req.params.id}`));
 router.get('/organization/:id', organizationDetailsPage);
 
 // error handling middlewares

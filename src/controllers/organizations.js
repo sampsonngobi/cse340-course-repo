@@ -13,8 +13,13 @@ const organizationsPage = async (req, res) => {
 const organizationDetailsPage = async (req, res) => {
         const organizationId = req.params.id;
         const organizationDetails = await getOrganizationDetails(organizationId);
+
+        if (!organizationDetails) {
+                return res.status(404).render('errors/404', { title: 'Page Not Found' });
+        }
+
         const projects = await getProjectsByOrganizationId(organizationId);
-        const title = 'Organization Details';
+        const title = organizationDetails.name;
 
         res.render('organization', { title, organizationDetails, projects });
 };

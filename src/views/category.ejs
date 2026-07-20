@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+<main>
+    <h1><%= title %></h1>
+
+    <% if (category) { %>
+        <section>
+            <p><strong>Category ID:</strong> <%= category.category_id %></p>
+            <p><strong>Name:</strong> <%= category.name %></p>
+        </section>
+
+        <section>
+            <h2>Service Projects</h2>
+
+            <% if (typeof projects !== 'undefined' && projects.length > 0) { %>
+                <ul>
+                    <% projects.forEach((project) => { %>
+                        <li>
+                            <a href="/project/<%= project.project_id %>"><strong><%= project.title %></strong></a>
+                            <span> - </span>
+                            <a href="/organization/<%= project.organization_id %>"><%= project.organization_name %></a>
+                            <span> - </span>
+                            <%= new Date(project.date).toLocaleDateString('en-US') %>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <p>No service projects found for this category.</p>
+            <% } %>
+        </section>
+    <% } %>
+</main>
+<%- include('partials/footer') %>
