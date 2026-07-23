@@ -12,6 +12,17 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Global error handlers for unhandled rejections and exceptions
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[UNHANDLED REJECTION]', reason);
+    console.error('[PROMISE]', promise);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('[UNCAUGHT EXCEPTION]', error);
+    process.exit(1);
+});
+
 // Define the application environment
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 
@@ -31,11 +42,35 @@ app.set('views', path.join(__dirname, 'src/views'));
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Track all requests at the earliest point
+app.use((req, res, next) => {
+    console.log('[EARLY] Received:', req.method, req.url, 'Content-Type:', req.get('content-type'));
+    res.on('finish', () => {
+        console.log('[EARLY] Finished:', req.method, req.url, res.statusCode);
+    });
+    res.on('close', () => {
+        console.log('[EARLY] Closed:', req.method, req.url);
+    });
+    next();
+});
+
+// Allow Express to receive and process common POST data
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Debug middleware - log immediately after parsing
+app.use((req, res, next) => {
+    console.log(`[PARSER] Method: ${req.method}, URL: ${req.url}, Content-Type: ${req.get('content-type')}`);
+    if (req.method === 'POST') {
+        console.log('[PARSER] POST body:', req.body);
+    }
+    next();
+});
 
 // Middleware to log all incoming requests
 app.use((req, res, next) => {
     if (NODE_ENV === 'development') {
-        console.log(`${req.method} ${req.url}`);
+        console.log(`[REQUEST] ${req.method} ${req.url}`);
     }
     next(); // Pass control to the next middleware or route
 });
@@ -51,7 +86,14 @@ app.use((req, res, next) => {
  * Route
  */
 
-app.use(router); 
+// Test route to verify POST requests work
+app.post('/test-post', (req, res) => {
+    console.log('[TEST ROUTE] POST /test-post received');
+    console.log('[TEST ROUTE] Body:', req.body);
+    res.json({ message: 'Test POST received', body: req.body });
+});
+
+app.use(router);
 
 
 // Catch-all route for 404 errors
@@ -64,6 +106,7 @@ app.use((req, res, next) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
+    console.log('[ERROR HANDLER] Caught error');
     // Log error details for debugging
     console.error('Error occurred:', err.message);
     console.error('Stack trace:', err.stack);
@@ -71,6 +114,8 @@ app.use((err, req, res, next) => {
     // Determine status and template
     const status = err.status || 500;
     const template = status === 404 ? '404' : '500';
+
+    console.log('[ERROR HANDLER] Status:', status, 'Template:', template);
 
     // Prepare data for the template
     const context = {
@@ -80,7 +125,18 @@ app.use((err, req, res, next) => {
     };
 
     // Render the appropriate error template
-    res.status(status).render(`errors/${template}`, context);
+    try {
+        console.log('[ERROR HANDLER] Rendering template:', `errors/${template}`);
+        res.status(status).render(`errors/${template}`, context, (renderErr) => {
+            if (renderErr) {
+                console.error('[ERROR HANDLER] Render error:', renderErr);
+                res.status(status).send(`<h1>${context.title}</h1><p>${context.error}</p>`);
+            }
+        });
+    } catch (renderErr) {
+        console.error('[ERROR HANDLER] Exception during render:', renderErr);
+        res.status(status).send(`<h1>${context.title}</h1><p>${context.error}</p>`);
+    }
 });
 
 app.listen(PORT, async () => {

@@ -1,11 +1,10 @@
 import express from 'express';
 
 import { homePage } from "./index.js";
-import { organizationsPage, organizationDetailsPage } from "./organizations.js";
+import { organizationsPage, organizationDetailsPage, showNewOrganizationForm, processNewOrganizationForm } from "./organizations.js";
 import { projetspage, showProjectDetailsPage } from "./projects.js";
-import { categoriesPage, categoryDetailsPage } from "./categories.js";  
+import { categoriesPage, categoryDetailsPage } from "./categories.js";
 import { testErrorPage } from "./errors.js";
-
 
 const router = express.Router();
 
@@ -19,10 +18,9 @@ router.get('/categories/:id', (req, res) => res.redirect(`/category/${req.params
 router.get('/category/:id', categoryDetailsPage);
 router.get('/organizations/:id', (req, res) => res.redirect(`/organization/${req.params.id}`));
 router.get('/organization/:id', organizationDetailsPage);
-
-// error handling middlewares
+router.get('/new-organization', showNewOrganizationForm);
+router.post('/new-organization', processNewOrganizationForm);
 router.get('/test-error', testErrorPage);
 
 export default router;
-
 
