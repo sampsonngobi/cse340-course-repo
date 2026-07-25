@@ -4,7 +4,7 @@ import path from 'path';
 
 import { testConnection } from './src/models/db.js';
 
-import router from './src/controllers/routs.js';
+import router from './src/routs.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
