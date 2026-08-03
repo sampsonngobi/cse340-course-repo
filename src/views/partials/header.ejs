@@ -18,3 +18,15 @@
             <li><a href="/categories">Categories</a></li>
         </ul>
     </nav>
+
+    <% const emptyMessages = { success: [], error: [], warning: [], info: [] }; %>
+    <% const messages = typeof flash === 'function' ? flash() : emptyMessages; %>
+    <% Object.keys(messages).forEach((type) => { %>
+        <% if (Array.isArray(messages[type]) && messages[type].length > 0) { %>
+            <% messages[type].forEach((msg) => { %>
+                <div class="alert <%= type %>">
+                    <%= msg %>
+                </div>
+            <% }); %>
+        <% } %>
+    <% }); %>
