@@ -10,7 +10,17 @@ import {
     showEditOrganizationForm,
     processEditOrganizationForm
 } from './controllers/organizations.js';
-import { projetspage, showProjectDetailsPage, showNewProjectForm, processNewProjectForm, showEditProjectForm, processEditProjectForm, projectValidation } from "./controllers/projects.js";
+import {
+    projetspage,
+    showProjectDetailsPage,
+    showNewProjectForm,
+    processNewProjectForm,
+    showEditProjectForm,
+    processEditProjectForm,
+    volunteerForProject,
+    removeVolunteerFromProjectSignup,
+    projectValidation
+} from "./controllers/projects.js";
 import { categoriesPage, categoryDetailsPage, showAssignCategoriesForm, processAssignCategoriesForm } from "./controllers/categories.js";
 import { testErrorPage } from "./controllers/errors.js";
 import { showUserRegistrationForm, processUserRegistrationForm, showLoginForm, processLoginForm, processLogout, requireLogin, showDashboard, requireRole } from "./controllers/users.js";
@@ -23,6 +33,8 @@ router.get('/organizations', organizationsPage);
 router.get('/projects', projetspage);
 router.get('/projects/:id', (req, res) => res.redirect(`/project/${req.params.id}`));
 router.get('/project/:id', showProjectDetailsPage);
+router.get('/project/:id/volunteer', requireLogin, volunteerForProject);
+router.get('/project/:id/unvolunteer', requireLogin, removeVolunteerFromProjectSignup);
 router.get('/edit-project/:id', requireRole('admin'), showEditProjectForm);
 router.get('/assign-categories/:projectId', requireRole('admin'), showAssignCategoriesForm);
 router.get('/new-project', requireRole('admin'), showNewProjectForm);
@@ -51,7 +63,7 @@ router.post('/register', processUserRegistrationForm);
 router.get('/login', showLoginForm);
 router.post('/login', processLoginForm);
 router.get('/logout', processLogout);
-router.get('/dashboard', requireRole('admin'), showDashboard);
+router.get('/dashboard', requireLogin, showDashboard);
 
 
 export default router;

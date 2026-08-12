@@ -155,6 +155,21 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE user_service_project (
+    user_id INT NOT NULL,
+    project_id INT NOT NULL,
+    volunteered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, project_id),
+    CONSTRAINT fk_usp_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_usp_project
+        FOREIGN KEY (project_id)
+        REFERENCES service_project(project_id)
+        ON DELETE CASCADE
+);
+
 
 
 -- Insert a test user
@@ -170,3 +185,6 @@ JOIN roles r ON u.role_id = r.role_id;
 -- DELETE FROM users WHERE email = 'test@example.com';
 
 UPDATE users SET role_id = (SELECT role_id FROM roles WHERE role_name = 'admin') WHERE email = 'admin@example.com';
+
+
+

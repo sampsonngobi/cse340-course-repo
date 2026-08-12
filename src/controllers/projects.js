@@ -1,6 +1,14 @@
 import { body, validationResult } from 'express-validator';
 
-import { createProject, getUpcomingProjects, getProjectDetails, updateProject } from '../models/projects.js';
+import {
+    createProject,
+    getUpcomingProjects,
+    getProjectDetails,
+    updateProject,
+    addVolunteerToProject,
+    removeVolunteerFromProject,
+    isUserVolunteeringForProject
+} from '../models/projects.js';
 import { getAllOrganizations } from '../models/organizations.js';
 import { getCategoriesByProjectId } from '../models/categories.js';
 
@@ -53,9 +61,14 @@ const showProjectDetailsPage = async (req, res) => {
     }
 
     const categories = await getCategoriesByProjectId(projectId);
+    let isVolunteering = false;
+
+    if (req.session?.user) {
+        isVolunteering = await isUserVolunteeringForProject(req.session.user.user_id, projectId);
+    }
 
     const title = projectDetails.title;
-    res.render('project', { title, project: projectDetails, categories });
+    res.render('project', { title, project: projectDetails, categories, isVolunteering });
 };
 
 const showNewProjectForm = async (req, res) => {
@@ -115,4 +128,35 @@ const processEditProjectForm = async (req, res) => {
     res.redirect(`/project/${projectId}`);
 };
 
-export { projetspage, showProjectDetailsPage, showNewProjectForm, processNewProjectForm, showEditProjectForm, processEditProjectForm, projectValidation };
+const volunteerForProject = async (req, res) => {
+    const projectId = req.params.id;
+
+    await addVolunteerToProject(req.session.user.user_id, projectId);
+    req.flash('success', 'You are now volunteering for this project.');
+    res.redirect(`/project/${projectId}`);
+};
+
+const removeVolunteerFromProjectSignup = async (req, res) => {
+    const projectId = req.params.id;
+
+    await removeVolunteerFromProject(req.session.user.user_id, projectId);
+    req.flash('success', 'You are no longer volunteering for this project.');
+
+    if (req.query.redirect === 'dashboard') {
+        return res.redirect('/dashboard');
+    }
+
+    res.redirect(`/project/${projectId}`);
+};
+
+export {
+    projetspage,
+    showProjectDetailsPage,
+    showNewProjectForm,
+    processNewProjectForm,
+    showEditProjectForm,
+    processEditProjectForm,
+    volunteerForProject,
+    removeVolunteerFromProjectSignup,
+    projectValidation
+};
