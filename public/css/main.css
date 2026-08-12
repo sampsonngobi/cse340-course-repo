@@ -76,6 +76,36 @@ nav a:focus-visible {
     outline-offset: 2px;
 }
 
+main a:not(.action-link),
+footer a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+main a:not(.action-link):hover,
+main a:not(.action-link):focus-visible,
+footer a:hover,
+footer a:focus-visible {
+    color: var(--primary-hover);
+    text-decoration-color: var(--primary-hover);
+}
+
+main a:not(.action-link):focus-visible,
+footer a:focus-visible {
+    outline: 3px solid rgba(10, 93, 184, 0.35);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+main a:not(.action-link):visited,
+footer a:visited {
+    color: #255d9c;
+}
+
 main {
     width: min(1000px, calc(100% - 2rem));
     margin: 2rem auto;
@@ -187,6 +217,7 @@ label {
 input[type="text"],
 input[type="email"],
 input[type="date"],
+input[type="password"],
 select,
 textarea {
     padding: 0.75rem 1rem;
@@ -202,6 +233,7 @@ textarea {
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="date"]:focus,
+input[type="password"]:focus,
 select:focus,
 textarea:focus {
     outline: none;

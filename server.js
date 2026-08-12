@@ -33,7 +33,8 @@ process.on('uncaughtException', (error) => {
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 
 // Define the port number the server will listen on
-const PORT = process.env.PORT || 3000;
+const PORT = Number.parseInt(process.env.PORT || '3000', 10);
+const MAX_PORT_ATTEMPTS = 10;
 
 /**
   * Configure Express middleware
@@ -94,7 +95,25 @@ app.use((req, res, next) => {
 
 
 // Middleware to make NODE_ENV available to all templates
+// app.use((req, res, next) => {
+//     res.locals.isLoggedIn = false;
+//     if (req.session && req.session.user) {
+//         res.locals.isLoggedIn = true;
+//     }
+
+//     res.locals.NODE_ENV = NODE_ENV;
+//     next();
+// });
+
+// Middleware to set res.locals variables for to all templates
 app.use((req, res, next) => {
+    res.locals.isLoggedIn = false;
+    if (req.session && req.session.user) {
+        res.locals.isLoggedIn = true;
+    }
+
+    res.locals.user = req.session.user || null;
+
     res.locals.NODE_ENV = NODE_ENV;
     next();
 });
@@ -156,12 +175,27 @@ app.use((err, req, res, next) => {
     }
 });
 
-app.listen(PORT, async () => {
-    try {
-        await testConnection();
-        console.log(`Server is running at http://127.0.0.1:${PORT}`);
-        console.log(`Environment: ${NODE_ENV}`);
-    } catch (error) {
-        console.error('Error connecting to the database:', error);
-    }
-});
+const startServer = async (port, attemptsLeft = MAX_PORT_ATTEMPTS) => {
+    const server = app.listen(port, async () => {
+        try {
+            await testConnection();
+            console.log(`Server is running at http://127.0.0.1:${server.address().port}`);
+            console.log(`Environment: ${NODE_ENV}`);
+        } catch (error) {
+            console.error('Error connecting to the database:', error);
+        }
+    });
+
+    server.on('error', (error) => {
+        if (error.code === 'EADDRINUSE' && attemptsLeft > 0) {
+            const nextPort = port + 1;
+            console.warn(`Port ${port} is already in use, trying ${nextPort} instead.`);
+            startServer(nextPort, attemptsLeft - 1);
+            return;
+        }
+
+        throw error;
+    });
+};
+
+startServer(PORT);
